@@ -1,3 +1,4 @@
+-- Active: 1740668000400@@localhost@5432@datawarehouse@silver
 CREATE OR REPLACE PROCEDURE bronze.load_bronze()
 LANGUAGE plpgsql 
 AS $$

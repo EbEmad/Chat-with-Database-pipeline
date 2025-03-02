@@ -49,26 +49,4 @@ CREATE TABLE bronze.prm_px_cat (
    subcat varchar(50),
    mantance varchar(50)
 );
-SELECT NOW() ;
-declare start_time TIMESTAMP ;
- end_time TIMESTAMP;
-go
- start_time:=now();
-go
- end_time:=now();
-go
-raise notice 'result is %seconds ',extract(epoch from (end_time-start_time));
-DO $$ 
-DECLARE 
-    start_time TIMESTAMP;
-    end_time TIMESTAMP;
-    duration DOUBLE PRECISION;
-BEGIN
-    start_time := NOW();
-    PERFORM pg_sleep(2);  -- Simulate delay (2 seconds)
-    end_time := NOW();
-    
-    duration := EXTRACT(EPOCH FROM (end_time - start_time));
-    
-    RAISE NOTICE 'Result is % seconds', duration;
-END $$;
+
