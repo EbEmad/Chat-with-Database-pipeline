@@ -83,4 +83,44 @@ WHERE prd_end_dt < prd_start_dt;
 -- Checking 'silver.crm_sales_details'
 -- ====================================================================
 -- Check for Invalid Dates
--- Expectation: No Invalid Dates
+-- Expectation: No Invalid Dates\-- check the relation between the  tables
+SELECT sls_ord_num,
+sls_prd_key,
+sls_cust_id,
+sls_order_dt,
+sls_ship_dt,
+sls_due_dt,sls_sales,
+sls_quantity,
+sls_price
+FROM bronze.crm_sales_info
+ where sls_cust_id not in (select cst_id from silver.crm_cust_info);
+
+ -- check for invalid issues
+select sls_due_dt
+from bronze.crm_sales_info
+where cast(sls_due_dt as integer)<=0 or 
+length(sls_due_dt)!=8 or 
+cast(sls_due_dt as integer) >20500101;
+-- check for Invalid Date orders
+SELECT * 
+from bronze.crm_sales_info
+where cast(sls_order_dt as integer)>cast(sls_ship_dt as integer) or 
+cast(sls_order_dt as integer)>cast(sls_due_dt as integer);
+
+-- check data consistency between sales and quantity and price
+select  distinct sls_sales as sls_sales_old,
+sls_quantity,
+sls_price as sls_price_old,
+case when  sls_sales is null or sls_sales<=0 or sls_sales!=sls_quantity*abs(sls_price)
+    then sls_quantity*abs(sls_price)
+    else sls_sales
+    end as sls_sales,
+case when sls_price is null or sls_price<=0
+then sls_sales/ NULLIF(sls_quantity,0)
+else sls_price
+end as sls_price
+from bronze.crm_sales_info
+where sls_sales!=sls_quantity*sls_price
+or sls_quantity is null or sls_sales is null or sls_price is null or
+sls_quantity <=0 or sls_sales <=0 or sls_price <=0
+order by sls_sales,sls_quantity,sls_price;

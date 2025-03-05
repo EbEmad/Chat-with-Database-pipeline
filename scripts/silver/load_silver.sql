@@ -46,3 +46,5 @@ end as prd_line,
 cast(prd_start_dt as date) as prd_start_dt,
 cast(lead(prd_start_dt) over (partition by prd_key order by prd_start_dt)-1 as date) as prd_end_dt
 from bronze.crm_prd_info;
+
+------ transform crm_prd_info ----------
