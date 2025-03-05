@@ -1,3 +1,14 @@
+/*
+===============================================================================
+DDL Script: Create Bronze Tables
+===============================================================================
+Script Purpose:
+    This script creates tables in the 'bronze' schema, dropping existing tables 
+    if they already exist.
+	  Run this script to re-define the DDL structure of 'bronze' Tables
+===============================================================================
+*/
+
 drop  table if exists bronze.crm_cust_info;
 CREATE TABLE bronze.crm_cust_info (
     cst_id INT,
