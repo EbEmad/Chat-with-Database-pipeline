@@ -124,3 +124,27 @@ where sls_sales!=sls_quantity*sls_price
 or sls_quantity is null or sls_sales is null or sls_price is null or
 sls_quantity <=0 or sls_sales <=0 or sls_price <=0
 order by sls_sales,sls_quantity,sls_price;
+
+select *
+from silver.crm_sales_info
+
+
+-- ====================================================================
+-- Checking 'silver.erp_cust_az12'
+-- ====================================================================
+-- Identify Out-of-Range Dates
+-- Expectation: Birthdates between 1924-01-01 and Today
+
+
+-- check for the bdate validation
+select distinct bdate
+from bronze.prm_cust
+where bdate<'1924-01-01' or bdate>now();
+
+-- data standardization && Consistency
+select distinct gender,
+case when upper(trim(gender)) in ('F','FEMALE') then 'Female'
+    when upper(trim(gender)) in ('M','MALE') then 'Male'
+    else 'n/a'
+    end as gender
+from bronze.prm_cust;

@@ -48,3 +48,61 @@ cast(lead(prd_start_dt) over (partition by prd_key order by prd_start_dt)-1 as d
 from bronze.crm_prd_info;
 
 ------ transform crm_prd_info ----------
+insert into silver.crm_sales_info(
+            sls_ord_num,
+sls_prd_key,
+sls_cust_id,
+sls_order_dt,
+sls_ship_dt,
+sls_due_dt,
+sls_sales,
+sls_quantity,
+sls_price
+)
+SELECT sls_ord_num,
+sls_prd_key,
+sls_cust_id,
+case when cast(sls_order_dt as integer)=0 or length(sls_order_dt )!=8
+then null
+else cast(cast(sls_order_dt as varchar) as date)
+end as sls_order_dt,
+case when cast(sls_ship_dt as integer)=0 or length(sls_ship_dt )!=8
+then null
+else cast(cast(sls_ship_dt as varchar) as date)
+end  as sls_ship_dt,
+case when cast(sls_due_dt as integer)=0 or length(sls_due_dt )!=8
+then null
+else cast(cast(sls_due_dt as varchar) as date)
+end sls_due_dt,
+case when  sls_sales is null or sls_sales<=0 or sls_sales!=sls_quantity*abs(sls_price)
+    then sls_quantity*abs(sls_price)
+    else sls_sales
+    end as sls_sales,
+sls_quantity,
+case when  sls_sales is null or sls_sales<=0 or sls_sales!=sls_quantity*abs(sls_price)
+    then sls_quantity*abs(sls_price)
+    else sls_sales
+    end as sls_price
+FROM bronze.crm_sales_info;
+
+
+------ transform prm_cust ----------
+
+insert into silver.prm_cust(
+    cid,
+    bdate,
+    gender
+)
+SELECT 
+case when cid like 'NAS%' 
+THEN substring(cid,4,length(cid))
+else cid
+end as cid,
+case when bdate>now() then NULL
+    else bdate
+end as bdate,
+case when upper(trim(gender)) in ('F','FEMALE') then 'Female'
+    when upper(trim(gender)) in ('M','MALE') then 'Male'
+    else 'n/a'
+    end as gender
+FROM bronze.prm_cust;
