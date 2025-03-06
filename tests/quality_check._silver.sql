@@ -147,4 +147,40 @@ case when upper(trim(gender)) in ('F','FEMALE') then 'Female'
     when upper(trim(gender)) in ('M','MALE') then 'Male'
     else 'n/a'
     end as gender
-from bronze.prm_cust;
+from bronze.prm_cust
+
+-- ====================================================================
+-- Checking 'silver.erp_loc_a101'
+-- ====================================================================
+-- Data Standardization & Consistency
+
+SELECT 
+replace(cid,'-','') as cid,
+case when trim(cntry) = 'DE' then 'Germany'
+    when trim(cntry) in ('US','USA') then 'United States'
+    when trim(cntry) = '' or cntry is null then 'n/a'
+    else trim(cntry)
+    end as cntry
+
+FROM bronze.prm_loc;
+
+
+-- data standardization && consistency
+select distinct cntry
+from bronze.prm_loc
+order by cntry;
+
+
+
+SELECT distinct
+cntry ,
+case when trim(cntry) = 'DE' then 'Germany'
+    when trim(cntry) in ('US','USA') then 'United States'
+    when trim(cntry) = '' or cntry is null then 'n/a'
+    else trim(cntry)
+    end as cntry
+
+FROM bronze.prm_loc;
+
+select distinct *
+from silver.prm_loc

@@ -106,3 +106,17 @@ case when upper(trim(gender)) in ('F','FEMALE') then 'Female'
     else 'n/a'
     end as gender
 FROM bronze.prm_cust;
+
+------ transform prm_loc ----------
+
+insert into silver.prm_loc(
+    cid,cntry
+)
+SELECT REPLACE(cid,'-','') as cid ,
+case when trim(cntry) = 'DE' then 'Germany'
+    when trim(cntry) in ('US','USA') then 'United States'
+    when trim(cntry) = '' or cntry is null then 'n/a'
+    else trim(cntry)
+    end as cntry
+
+FROM bronze.prm_loc;
