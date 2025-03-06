@@ -1,4 +1,11 @@
 
+CREATE OR REPLACE PROCEDURE silver.insertsilver()
+LANGUAGE plpgsql 
+AS $$
+BEGIN
+raise notice 'Truncating the table silver.crm_cust_info';
+TRUNCATE table silver.prm_px_cat;
+raise notice 'Inserting the table silver.crm_cust_info';
 
 ------ transform crm_cust_info ----------
 insert into silver.crm_cust_info (
@@ -17,9 +24,11 @@ from (
     from bronze.crm_cust_info
     where cst_id is not NULL
 ) as t where flag_last=1;
------------------------------------
-
 ------ transform crm_prd_info ----------
+
+raise notice 'Truncating the table silver.crm_prd_info ';
+TRUNCATE table silver.crm_prd_info;
+raise notice 'Inserting the table silver.crm_prd_info ';
 
 insert into silver.crm_prd_info(
     prd_id,
@@ -48,6 +57,9 @@ cast(lead(prd_start_dt) over (partition by prd_key order by prd_start_dt)-1 as d
 from bronze.crm_prd_info;
 
 ------ transform crm_prd_info ----------
+raise notice 'Truncating the table silver.crm_sales_info ';
+TRUNCATE table silver.crm_sales_info;
+raise notice 'Inserting the table silver.crm_sales_info ';
 insert into silver.crm_sales_info(
             sls_ord_num,
 sls_prd_key,
@@ -87,6 +99,9 @@ FROM bronze.crm_sales_info;
 
 
 ------ transform prm_cust ----------
+raise notice 'Truncating the table silver.prm_cust ';
+TRUNCATE table silver.prm_cust;
+raise notice 'Inserting the table silver.prm_cust ';
 
 insert into silver.prm_cust(
     cid,
@@ -108,6 +123,9 @@ case when upper(trim(gender)) in ('F','FEMALE') then 'Female'
 FROM bronze.prm_cust;
 
 ------ transform prm_loc ----------
+raise notice 'Truncating the table silver.prm_loc ';
+TRUNCATE table silver.prm_loc;
+raise notice 'Inserting the table silver.prm_loc ';
 
 insert into silver.prm_loc(
     cid,cntry
@@ -120,3 +138,19 @@ case when trim(cntry) = 'DE' then 'Germany'
     end as cntry
 
 FROM bronze.prm_loc;
+
+
+------ transform prm_px_cat ----------
+raise notice 'Truncating the table silver.prm_px_cat ';
+TRUNCATE table silver.prm_px_cat;
+raise notice 'Inserting the table silver.prm_px_cat ';
+
+insert into silver.prm_px_cat(
+    id,
+    cat,
+    subcat,
+    mantance
+)
+select id,cat,subcat,mantance
+from bronze.prm_px_cat;
+END $$;

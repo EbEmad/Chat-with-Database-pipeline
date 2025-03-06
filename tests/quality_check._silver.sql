@@ -184,3 +184,17 @@ FROM bronze.prm_loc;
 
 select distinct *
 from silver.prm_loc
+
+-- ====================================================================
+-- Checking 'silver.erp_px_cat_g1v2'
+-- ====================================================================
+-- Check for Unwanted Spaces
+-- Expectation: No Results
+
+select *
+from bronze.prm_px_cat
+where cat!=trim(cat) or subcat!=trim(subcat) or mantance!=trim(mantance);
+
+-- check data standardization && Consistency
+select DISTINCT mantance
+from bronze.prm_px_cat;
