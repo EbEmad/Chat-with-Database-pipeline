@@ -154,3 +154,5 @@ insert into silver.prm_px_cat(
 select id,cat,subcat,mantance
 from bronze.prm_px_cat;
 END $$;
+
+call silver.insertsilver();
