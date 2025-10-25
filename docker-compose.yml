@@ -1,12 +1,65 @@
 version: '3.8'
-
 services:
-  postgres:
+  db:
     image: postgres:latest
     container_name: postgres_container
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_PASSWORD: 200322876  
-      POSTGRES_DB: testdb
-      POSTGRES_USER: root     
+      - POSTGRES_PASSWORD= ${POSTGRES_PASSWORD} 
+      - POSTGRES_DB= ${POSTGRES_DB} 
+      - POSTGRES_USER= ${POSTGRES_USER}
+    volumes:
+      - ./db_init/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
+
+  postgres:
+    image: postgres:13
+    environment:
+      - POSTGRES_PASSWORD= ${AIRFLOW_PASSWORD} 
+      - POSTGRES_DB= ${AIRFLOW_DB} 
+      - POSTGRES_USER= ${AIRFLOW_USER} 
+     
+  webserver:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: airflow
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${AIRFLOW_USER}:${AIRFLOW_PASSWORD}@postgres/${AIRFLOW_DB} 
+      - AIRFLOW__WEBSERVER__SECRET_KEY=mysecretkey
+      - AIRFLOW__CORE__FERNET_KEY=GgyJ5jUehSy2zQqY958eUWW1ezEgNp4OerBy-AKuD14=
+      - PYTHONPATH=/opt/airflow
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/logs:/opt/airflow/logs
+      - ./scripts:/opt/airflow/scripts
+      - ./tests:/opt/airflow/tests
+    ports:
+      - "8080:8080"
+    entrypoint: /Airflow.sh
+    depends_on:
+      - postgres
+      - db
+    command: webserver
+
+  scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: airflow
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${AIRFLOW_USER}:${AIRFLOW_PASSWORD}@postgres/${AIRFLOW_DB}
+      - AIRFLOW__WEBSERVER__SECRET_KEY=mysecretkey
+      - AIRFLOW__CORE__FERNET_KEY=GgyJ5jUehSy2zQqY958eUWW1ezEgNp4OerBy-AKuD14=
+      - PYTHONPATH=/opt/airflow
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/logs:/opt/airflow/logs
+      - ./scripts:/opt/airflow/scripts
+      - ./tests:/opt/airflow/tests
+    depends_on:
+      - postgres
+      - db
+    command: scheduler
