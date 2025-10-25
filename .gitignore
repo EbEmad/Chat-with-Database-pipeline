@@ -22,3 +22,5 @@ Thumbs.db
 # Ignore exported data or diagrams (if applicable)
 *.csv
 *.pdf
+
+*.env
