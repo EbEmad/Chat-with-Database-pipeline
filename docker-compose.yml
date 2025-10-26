@@ -1,29 +1,34 @@
 version: '3.8'
 services:
   db:
-    image: postgres:latest
+    image: postgres:13
     container_name: postgres_container
     ports:
-      - "5432:5432"
+      - "5433:5432"
     environment:
-      - POSTGRES_PASSWORD= ${POSTGRES_PASSWORD} 
-      - POSTGRES_DB= ${POSTGRES_DB} 
-      - POSTGRES_USER= ${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD} 
+      - POSTGRES_DB=${POSTGRES_DB} 
+      - POSTGRES_USER=${POSTGRES_USER}
     volumes:
       - ./db_init/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
+      - ./datasets:/app
 
   postgres:
     image: postgres:13
     environment:
-      - POSTGRES_PASSWORD= ${AIRFLOW_PASSWORD} 
-      - POSTGRES_DB= ${AIRFLOW_DB} 
-      - POSTGRES_USER= ${AIRFLOW_USER} 
+      - POSTGRES_PASSWORD=${AIRFLOW_PASSWORD} 
+      - POSTGRES_DB=${AIRFLOW_DB} 
+      - POSTGRES_USER=${AIRFLOW_USER} 
+    ports:
+      - "5432:5432"
      
   webserver:
     build:
-      context: .
+      context: ./Docker
       dockerfile: Dockerfile
       target: airflow
+    env_file:
+      - .env
     environment:
       - AIRFLOW__CORE__EXECUTOR=LocalExecutor
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${AIRFLOW_USER}:${AIRFLOW_PASSWORD}@postgres/${AIRFLOW_DB} 
@@ -33,8 +38,9 @@ services:
     volumes:
       - ./airflow/dags:/opt/airflow/dags
       - ./airflow/logs:/opt/airflow/logs
-      - ./scripts:/opt/airflow/scripts
-      - ./tests:/opt/airflow/tests
+      - ./sql:/opt/airflow/scripts
+      - ./datasets:/opt/airflow/app
+
     ports:
       - "8080:8080"
     entrypoint: /Airflow.sh
@@ -45,9 +51,11 @@ services:
 
   scheduler:
     build:
-      context: .
+      context: ./Docker
       dockerfile: Dockerfile
       target: airflow
+    env_file:
+      - .env
     environment:
       - AIRFLOW__CORE__EXECUTOR=LocalExecutor
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${AIRFLOW_USER}:${AIRFLOW_PASSWORD}@postgres/${AIRFLOW_DB}
@@ -57,8 +65,8 @@ services:
     volumes:
       - ./airflow/dags:/opt/airflow/dags
       - ./airflow/logs:/opt/airflow/logs
-      - ./scripts:/opt/airflow/scripts
-      - ./tests:/opt/airflow/tests
+      - ./sql:/opt/airflow/scripts
+      - ./datasets:/opt/airflow/app
     depends_on:
       - postgres
       - db

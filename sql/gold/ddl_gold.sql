@@ -1,5 +1,8 @@
- 
- create view gold.dim_customers as
+DROP VIEW IF EXISTS gold.dim_customers;
+DROP VIEW IF EXISTS gold.dim_products;
+DROP VIEW IF EXISTS gold.fact_sales;
+
+CREATE VIEW gold.dim_customers AS
  select 
     row_number() over (order by cst_id) as customer_key,
     ci.cst_id as customer_id,
@@ -19,7 +22,7 @@ left join silver.prm_loc la on ci.cst_key=la.cid;
 
 
 
-create view gold.dim_products as
+CREATE VIEW gold.dim_products AS
 SELECT 
 row_number() over(order by pn.prd_start_dt,pn.prd_key) as product_key,
 pn.prd_id as product_id,
@@ -36,9 +39,7 @@ FROM silver.crm_prd_info pn left join silver.prm_px_cat pc on pn.cat_id=pc.id;
 
 
 
-drop view if exists gold.fact_sales;
-
-create view gold.fact_sales as
+CREATE VIEW gold.fact_sales AS
 SELECT sls_ord_num as order_number,
 pr.product_key ,
 cu.customer_key,
@@ -48,5 +49,5 @@ sd.sls_due_dt as due_date,
 sd.sls_sales as sales_amount,
 sd.sls_quantity as quanity,
 sd.sls_price  as price
-FROM crm_sales_info sd left join gold.dim_products pr  on sd.sls_prd_key=pr.product_number
+FROM silver.crm_sales_info sd left join gold.dim_products pr  on sd.sls_prd_key=pr.product_number
 left join gold.dim_customers cu on sd.sls_cust_id=cu.customer_id ;
