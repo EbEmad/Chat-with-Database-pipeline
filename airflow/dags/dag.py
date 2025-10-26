@@ -11,7 +11,7 @@ with DAG(
     catchup=False,
     tags=['data_engineering'],
     dagrun_timeout=timedelta(minutes=30)  ,
-    template_searchpath=['/opt/airflow/scripts','/opt/airflow/app'], 
+    template_searchpath=['/opt/airflow/scripts'], 
 ) as dag:
     create_table_bronze = PostgresOperator(
         task_id='create_table_bronze',
