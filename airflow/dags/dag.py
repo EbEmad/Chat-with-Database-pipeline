@@ -6,7 +6,7 @@ from airflow.providers.postgres.operators.postgres import PostgresOperator
 with DAG(
     dag_id='table_on_postgres',   
     description='this is a pipeline on postgres',
-    start_date=datetime(2025, 9, 26),
+    start_date=datetime(2025, 9, 27),
     schedule_interval='@daily',  
     catchup=False,
     tags=['data_engineering'],

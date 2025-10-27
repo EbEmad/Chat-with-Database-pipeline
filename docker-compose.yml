@@ -10,8 +10,8 @@ services:
       - POSTGRES_DB=${POSTGRES_DB} 
       - POSTGRES_USER=${POSTGRES_USER}
     volumes:
-      - ./db_init/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
-      - ./datasets:/app
+      - ./sql/db_init/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
+      - ./sql/datasets:/datasets
 
   postgres:
     image: postgres:13
@@ -39,7 +39,6 @@ services:
       - ./airflow/dags:/opt/airflow/dags
       - ./airflow/logs:/opt/airflow/logs
       - ./sql:/opt/airflow/scripts
-      - ./datasets:/opt/airflow/app
 
     ports:
       - "8080:8080"
@@ -66,7 +65,6 @@ services:
       - ./airflow/dags:/opt/airflow/dags
       - ./airflow/logs:/opt/airflow/logs
       - ./sql:/opt/airflow/scripts
-      - ./datasets:/opt/airflow/app
     depends_on:
       - postgres
       - db
